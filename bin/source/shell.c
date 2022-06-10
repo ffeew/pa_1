@@ -181,16 +181,13 @@ char *read_line_stdin(void)
 {
   size_t buf_size = SHELL_BUFFERSIZE;           // size of the buffer
   char *line = malloc(sizeof(char) * buf_size); // allocate memory space for the line*
-  /** TASK 1 **/
-  // read one line from stdin using getline()
-  // 1. Check that the char* returned by malloc is not NULL
-  // 2. Fetch an entire line from input stream stdin using getline() function. getline() will store user input onto the memory location allocated in (1)
-  // 3. Return the char*
-  // DO NOT PRINT ANYTHING TO THE OUTPUT
 
-  /***** BEGIN ANSWER HERE *****/
-
-  /*********************/
+    if( line == NULL)
+    {
+      perror("Unable to allocate buffer");
+    } else{
+      getline(&line,&buf_size,stdin);
+    }
 
   return line;
 }
@@ -265,24 +262,33 @@ void main_loop(void)
   } while (status);
 }
 
+//int main(int argc, char **argv)
+//{
+//
+//  printf("CSEShell Run successful. Running now: \n");
+//
+//  // Setup path
+//  if (getcwd(output_file_path, sizeof(output_file_path)) != NULL)
+//  {
+//    printf("Current working dir: %s\n", output_file_path);
+//  }
+//  else
+//  {
+//    perror("getcwd() error, exiting now.");
+//    return 1;
+//  }
+//
+//  // Run command loop
+//  main_loop();
+//
+//  return 0;
+//}
+
 int main(int argc, char **argv)
 {
 
-  printf("CSEShell Run successful. Running now: \n");
+    char* line = read_line_stdin();
+    printf("The fetched line is : %s \n", line);
 
-  // Setup path
-  if (getcwd(output_file_path, sizeof(output_file_path)) != NULL)
-  {
-    printf("Current working dir: %s\n", output_file_path);
-  }
-  else
-  {
-    perror("getcwd() error, exiting now.");
-    return 1;
-  }
-
-  // Run command loop
-  main_loop();
-
-  return 0;
+    return 0;
 }
