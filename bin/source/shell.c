@@ -155,18 +155,54 @@ int shell_exit(char **args)
 int process_command(char **args)
 {
   int child_exit_status = -1;
-  /** TASK 3 **/
+  if (args[0] == NULL){
+    return 1;
+  } else{
+      int i = 0;
+      int isBuiltInCommand = 0; // 0 = false, 1 = true
+      
+      while(builtin_commands[i]){
+        if (*args[0] == *builtin_commands[i]){
+          isBuiltInCommand = 1;
+          switch(i){
+            case 0:
+              shell_cd(args);
+              child_exit_status = 1;
+              break;
+            case 1:
+              shell_help(args);
+              child_exit_status = 1;
+              break;
+            case 2:
+              shell_exit(args);
+              child_exit_status = 1;
+              break;
+            case 3:
+              shell_usage(args);
+              child_exit_status = 1;
+              break;
+          }
+        }
+        i++;
+      }
 
-  // 1. Check if args[0] is NULL. If it is, an empty command is entered, return 1
-  // 2. Otherwise, check if args[0] is in any of our builtin_commands: cd, help, exit, or usage.
-  // 3. If conditions in (2) are satisfied, call builtin shell commands, otherwise perform fork() to exec the system program. Check if fork() is successful.
-  // 4. For the child process, call exec_sys_prog(args) to execute the matching system program. exec_sys_prog is already implemented for you.
-  // 5. For the parent process, wait for the child process to complete and fetch the child's exit status value to child_exit_status
-  // DO NOT PRINT ANYTHING TO THE OUTPUT
+      if (isBuiltInCommand==0){
+        pid_t pid;
+        pid = fork();
+        if (pid == 0) {
+          exec_sys_prog(args);
+          exit(EXIT_FAILURE);
+        } else if (pid>0){
+            int status;
+            waitpid(pid, &status, WUNTRACED);        
+            // if child terminates properly, WIFEXITED(status) returns TRUE
+            if (WIFEXITED(status)){
+                child_exit_status = WEXITSTATUS(status);
+            }
+        }
+      }
+  }
 
-  /***** BEGIN ANSWER HERE *****/
-
-  /*********************/
   if (child_exit_status != 1)
   {
     printf("Command %s has terminated abruptly.\n", args[0]);
@@ -182,10 +218,7 @@ char *read_line_stdin(void)
   size_t buf_size = SHELL_BUFFERSIZE;           // size of the buffer
   char *line = malloc(sizeof(char) * buf_size); // allocate memory space for the line*
 
-    if( line == NULL)
-    {
-      perror("Unable to allocate buffer");
-    } else{
+    if( line != NULL){
       getline(&line,&buf_size,stdin);
     }
 
@@ -287,15 +320,30 @@ void main_loop(void)
 
 int main(int argc, char **argv)
 {
- 
- printf("Shell Run successful. Running now: \n");
- 
- char* line = read_line_stdin();
- printf("The fetched line is : %s \n", line);
- 
- char** args = tokenize_line_stdin(line);
- printf("The first token is %s \n", args[0]);
- printf("The second token is %s \n", args[1]);
- 
- return 0;
+
+  printf("Shell Run successful. Running now: \n");
+
+  char *line = read_line_stdin();
+  printf("The fetched line is : %s \n", line);
+
+  char **args = tokenize_line_stdin(line);
+  printf("The first token is %s \n", args[0]);
+  printf("The second token is %s \n", args[1]);
+
+  // Setup path
+  if (getcwd(output_file_path, sizeof(output_file_path)) != NULL)
+  {
+    printf("Current working dir: %s\n", output_file_path);
+  }
+  else
+  {
+    perror("getcwd() error, exiting now.");
+    return 1;
+  }
+  process_command(args);
+  if (getcwd(output_file_path, sizeof(output_file_path)) != NULL)
+  {
+    printf("Current working dir: %s\n", output_file_path);
+  }
+  return 0;
 }
