@@ -158,11 +158,9 @@ int process_command(char **args)
   if (args[0] == NULL){
     return 1;
   } else{
-      int i = 0;
       int isBuiltInCommand = 0; // 0 = false, 1 = true
-      
-      while(builtin_commands[i]){
-        if (*args[0] == *builtin_commands[i]){
+      for (int i = 0; i<4; i++){
+        if (!strcmp(args[0], builtin_commands[i])){
           isBuiltInCommand = 1;
           switch(i){
             case 0:
@@ -175,22 +173,23 @@ int process_command(char **args)
               return shell_usage(args);
           }
         }
-        i++;
       }
 
       if (isBuiltInCommand==0){
         pid_t pid;
+        int status;
         pid = fork();
-        if (pid == 0) {
+
+        if (pid == 0){
           exec_sys_prog(args);
-          exit(EXIT_FAILURE);
-        } else if (pid>0){
-            int status;
+        }
+
+        else{
             waitpid(pid, &status, WUNTRACED);        
-            // if child terminates properly, WIFEXITED(status) returns TRUE
+          // if child terminates properly, WIFEXITED(status) returns TRUE
             if (WIFEXITED(status)){
                 child_exit_status = WEXITSTATUS(status);
-            }
+            }         
         }
       }
   }
