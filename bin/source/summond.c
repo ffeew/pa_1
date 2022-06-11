@@ -51,7 +51,6 @@ static int create_daemon()
     dup2(fd,STDIN_FILENO);
     
     /*********************/
-
     return 0;
 }
 
