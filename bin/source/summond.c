@@ -26,7 +26,30 @@ static int create_daemon()
     // 9. Return to main
     // DO NOT PRINT ANYTHING TO THE OUTPUT
     /***** BEGIN ANSWER HERE *****/
-
+    pid_t pid;
+    
+    pid = fork();
+    if (pid>0){
+        exit(1);
+    }
+    if (setsid() < 0)
+        exit(0);
+    signal(SIGCHLD, SIG_IGN);
+    signal(SIGHUP, SIG_IGN);
+    pid = fork();
+    if (pid > 0){
+        exit(1);
+    }
+    umask(0);
+    chdir("/");
+    for (int x = sysconf(_SC_OPEN_MAX); x>=0; x--){
+        close (x);
+    }
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd,STDOUT_FILENO);
+    dup2(fd,STDERR_FILENO);
+    dup2(fd,STDIN_FILENO);
+    
     /*********************/
 
     return 0;
