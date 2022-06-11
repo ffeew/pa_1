@@ -28,6 +28,21 @@ int execute()
    // DO NOT PRINT ANYTHING TO THE OUTPUT
 
    /***** BEGIN ANSWER HERE *****/
+   FILE *fp;
+
+   // open file in read mode
+   fp = fopen("output.txt", "r");
+   if (!fp) {
+      return 1;
+   }
+
+   char *buffer;
+   size_t size = 0;
+   ssize_t nread;
+   while (nread = getline(&buffer, &size, fp) != -1){
+      live_daemons++;
+   }
+   free(buffer);
 
    /*********************/
    if (live_daemons == 0)
