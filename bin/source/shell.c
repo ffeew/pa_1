@@ -155,6 +155,7 @@ int shell_exit(char **args)
 int process_command(char **args)
 {
   int child_exit_status = -1;
+  
   if (args[0] == NULL){
     return 1;
   } else{
@@ -182,6 +183,7 @@ int process_command(char **args)
 
         if (pid == 0){
           exec_sys_prog(args);
+          exit(EXIT_FAILURE);
         }
 
         else{
